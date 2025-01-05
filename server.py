@@ -7,6 +7,7 @@ import os
 app = Flask (__name__)
 
 ADMIN_TOKEN = "the_secure_token"  
+MAX_RETRIES = 3
 
 # Configuration via environment variables
 TRANSLATION_DELAY = int(os.getenv("TRANSLATION_DELAY", 15)) # Default delay is 15 seconds (integer)
@@ -33,6 +34,17 @@ def update_job_status(job_id):
         
         if progress == 100:
             job["status"] = "completed"
+
+    elif job["status"] == "failed" and job.get("retries", 0) < MAX_RETRIES:
+        job["retries"] += 1
+        job["status"] = "pending"
+        job["start_time"] = time.time()
+        job["progress"] = 0
+
+    elif job["status"] == "failed" and job.get("retries", 0) >= MAX_RETRIES:
+        job["status"] = "permanently failed"
+        job["progress"] = 100
+        job["retries"] = MAX_RETRIES
     return job
     
 @app.route('/translate', methods=['POST'])
@@ -43,7 +55,9 @@ def start_translation():
     job_id = str(uuid.uuid4())
     jobs[job_id] = {
         'status': 'pending',
-        'start_time': time.time()
+        'start_time': time.time(),
+        'progress': 0,
+        'retries': 0
     }
     return jsonify({'job_id': job_id}), 201
 
