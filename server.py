@@ -6,7 +6,7 @@ import os
 
 app = Flask (__name__)
 
-start_time = time.time()
+ADMIN_TOKEN = "the_secure_token"  
 
 # Configuration via environment variables
 TRANSLATION_DELAY = int(os.getenv("TRANSLATION_DELAY", 15)) # Default delay is 15 seconds (integer)
@@ -64,11 +64,21 @@ def get_status(job_id):
 
     return jsonify({'status': job['status']})
 
-@app.route('/cancel/<job_id>', methods=['DELETE'])
+@app.route('/cancel/<job_id>', methods=['POST'])
 def cancel_job(job_id):
     """
     Cancel a specific translation request by job ID.
+
+    This endpoint requires an authorization token for security purposes to make sure only authorized users can perform the cancellation.
+    And also, a cancellation reason is recorded for future reference.
     """
+    auth_header = request.headers.get('Authorization')
+    if auth_header is None or auth_header != f'Bearer {ADMIN_TOKEN}':
+        return jsonify({'status': 'failed', 'message': 'Unauthorized access'}), 401
+    
+    data = request.get_json()
+    reason = data.get("reason", "No reason provided.")
+
     job = jobs.get(job_id)
     if job is None:
         return jsonify({'status': 'failed', 'message': 'Job ID not found'}), 404
@@ -78,7 +88,8 @@ def cancel_job(job_id):
     
     # del jobs[job_id] # This line is commented out so that the job is not completely removed from the dictionary
     job["status"] = "cancelled"
-    return jsonify({'status': 'success', 'message': f'Job {job_id} cancelled successfully'}), 200
+    job["reason"] = reason
+    return jsonify({'status': 'success', 'message': f'Job {job_id} cancelled successfully','reason':reason}), 200
 
 @app.route('/jobs', methods=['GET'])
 def list_jobs():
