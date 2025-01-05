@@ -5,9 +5,11 @@ import random
 app = Flask (__name__)
 
 start_time = time.time()
+# To do: Make the translation delay and error rate configurable
 TRANSLATION_DELAY = 15 # Introducing a delay of 15 seconds to simulate translation job
 ERROR_RATE = 0.2 # Introducing an error rate of 20%
 
+# To do: Add more API endpoints to simulate the translation service, like allow multiple jobs with unique IDs, handling status of each job, listing all jobs
 @app.route('/status', methods=['GET'])
 def get_status():
     """
