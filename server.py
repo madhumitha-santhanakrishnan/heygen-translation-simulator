@@ -16,7 +16,7 @@ jobs = {} # Dictionary to store translation jobs
 
 def update_job_status(job_id):
     """
-    Update the status of a translation job.
+    Update the status and progress of a translation job.
     """
     job = jobs.get(job_id)
     if job is None:
@@ -25,6 +25,13 @@ def update_job_status(job_id):
     if job["status"] == "pending":
         time_elapsed = time.time() - job["start_time"]
         if time_elapsed >= TRANSLATION_DELAY:
+            progress = 100
+        else:
+            progress = int((time_elapsed / TRANSLATION_DELAY) * 100)
+
+        job["progress"] = progress
+        
+        if progress == 100:
             job["status"] = "completed"
     return job
     
