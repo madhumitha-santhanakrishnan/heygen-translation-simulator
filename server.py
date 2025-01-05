@@ -64,6 +64,22 @@ def get_status(job_id):
 
     return jsonify({'status': job['status']})
 
+@app.route('/cancel/<job_id>', methods=['DELETE'])
+def cancel_job(job_id):
+    """
+    Cancel a specific translation request by job ID.
+    """
+    job = jobs.get(job_id)
+    if job is None:
+        return jsonify({'status': 'failed', 'message': 'Job ID not found'}), 404
+    
+    if job['status'] == 'completed':
+        return jsonify({'status': 'failed', 'message': 'Job already completed, cannot cancel a completed job.'}), 400
+    
+    # del jobs[job_id] # This line is commented out so that the job is not completely removed from the dictionary
+    job["status"] = "cancelled"
+    return jsonify({'status': 'success', 'message': f'Job {job_id} cancelled successfully'}), 200
+
 @app.route('/jobs', methods=['GET'])
 def list_jobs():
     """
