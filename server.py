@@ -1,14 +1,16 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import time
 import random 
 import uuid
+import os
 
 app = Flask (__name__)
 
 start_time = time.time()
-# To do: Make the translation delay and error rate configurable
-TRANSLATION_DELAY = 15 # Introducing a delay of 15 seconds to simulate translation job
-ERROR_RATE = 0.2 # Introducing an error rate of 20%
+
+# Configuration via environment variables
+TRANSLATION_DELAY = int(os.getenv("TRANSLATION_DELAY", 15)) # Default delay is 15 seconds (integer)
+ERROR_RATE = float(os.getenv("ERROR_RATE", 0.2)) # Default error rate is 20% (float)
 
 jobs = {} # Dictionary to store translation jobs
 
@@ -71,5 +73,25 @@ def list_jobs():
         update_job_status(job_id)
     return jsonify(jobs), 200
 
+@app.route('/config', methods=['GET', 'POST'])
+def config():
+    """
+    Get or set the configuration values dynamically, when server is running and restart is not ideal.
+    """
+    global TRANSLATION_DELAY, ERROR_RATE
+
+    if request.method == 'GET':
+        return jsonify({'TRANSLATION_DELAY': TRANSLATION_DELAY, 'ERROR_RATE': ERROR_RATE}), 200
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        TRANSLATION_DELAY = data.get('TRANSLATION_DELAY', TRANSLATION_DELAY)
+        ERROR_RATE = data.get('ERROR_RATE', ERROR_RATE)
+        return jsonify({
+            'TRANSLATION_DELAY': TRANSLATION_DELAY,
+            'ERROR_RATE': ERROR_RATE,
+            'message': 'Configuration updated successfully'
+        }), 200
+    
 if __name__ == '__main__':
     app.run(port=4777)
