@@ -12,6 +12,20 @@ ERROR_RATE = 0.2 # Introducing an error rate of 20%
 
 jobs = {} # Dictionary to store translation jobs
 
+def update_job_status(job_id):
+    """
+    Update the status of a translation job.
+    """
+    job = jobs.get(job_id)
+    if job is None:
+        return None
+    
+    if job["status"] == "pending":
+        time_elapsed = time.time() - job["start_time"]
+        if time_elapsed >= TRANSLATION_DELAY:
+            job["status"] = "completed"
+    return job
+    
 @app.route('/translate', methods=['POST'])
 def start_translation():
     """
@@ -29,7 +43,7 @@ def get_status(job_id):
     """
     Get status of a specific translation request by job ID.
     """
-    job = jobs.get(job_id)
+    job = update_job_status(job_id)
 
     if job is None:
         return jsonify({'status': 'failed', 'message': 'Job ID not found'}), 404
@@ -46,18 +60,15 @@ def get_status(job_id):
         elif error_type == "unknown":
             return jsonify({'status': 'failed', 'message': 'An unknown error occurred'}), 508
 
-    time_elapsed = time.time() - job["start_time"]
-    if time_elapsed < TRANSLATION_DELAY: 
-        return jsonify({'status': 'pending'})
-    else:
-        job["status"] = "completed"
-        return jsonify({'status': 'completed'})
+    return jsonify({'status': job['status']})
 
 @app.route('/jobs', methods=['GET'])
 def list_jobs():
     """
-    List all jobs and their statuses (optional endpoint for debugging).
+    List all jobs and their statuses.
     """
+    for job_id in jobs.keys():
+        update_job_status(job_id)
     return jsonify(jobs), 200
 
 if __name__ == '__main__':
