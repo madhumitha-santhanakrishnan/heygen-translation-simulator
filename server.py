@@ -8,6 +8,8 @@ app = Flask (__name__)
 
 ADMIN_TOKEN = "the_secure_token"  
 MAX_RETRIES = 3
+RATE_LIMIT = 5  # Maximum number of requests for FREE users per hour
+user_requests = {}  # Track requests for each user
 
 # Configuration via environment variables
 TRANSLATION_DELAY = int(os.getenv("TRANSLATION_DELAY", 15)) # Default delay is 15 seconds (integer)
@@ -17,7 +19,7 @@ jobs = {} # Dictionary to store translation jobs
 
 def update_job_status(job_id):
     """
-    Update the status and progress of a translation job.
+    Update the status and progress of a translation job. Also, handle retries. 
     """
     job = jobs.get(job_id)
     if job is None:
@@ -52,14 +54,34 @@ def start_translation():
     """
     Start a new translation job and return unique job ID.
     """
+    data = request.get_json()
+    role = data.get("role", "free")
+    user_id = request.headers.get("X-User-Id", "anonymous")
+    # if not user_id:
+    #     return jsonify({'status': 'failed', 'message': 'user_id header is required'}), 400
+    
+    # Rate limiting logic for FREE users
+    if role == "free":
+        if user_id not in user_requests:
+            user_requests[user_id] = 0
+        user_requests[user_id] += 1
+
+
+        if user_requests[user_id] > RATE_LIMIT:
+            return jsonify({'status': 'failed', 'message': 'Rate limit exceeded'}), 429
+    
     job_id = str(uuid.uuid4())
-    jobs[job_id] = {
+    job = {
         'status': 'pending',
         'start_time': time.time(),
+        'role': role,
+        'priority': 1 if role == "premium" else 0,
+        'delay': TRANSLATION_DELAY if role == "free" else TRANSLATION_DELAY // 2,
         'progress': 0,
         'retries': 0
     }
-    return jsonify({'job_id': job_id}), 201
+    jobs[job_id] = job
+    return jsonify({'job_id': job_id, 'role': role, 'priority': job['priority']}), 201
 
 @app.route('/status/<job_id>', methods=['GET'])
 def get_status(job_id):
@@ -84,6 +106,27 @@ def get_status(job_id):
             return jsonify({'status': 'failed', 'message': 'An unknown error occurred'}), 508
 
     return jsonify({'status': job['status']})
+
+@app.route('/process', methods=['POST'])
+def process_jobs():
+    """
+    Process jobs from the queue, prioritizing premium jobs.
+    """
+    current_time = time.time()
+    sorted_jobs = sorted(
+        jobs.items(),
+        key=lambda x: (-x[1]['priority'], x[1]['start_time'])
+    )
+    for job_id, job in sorted_jobs:
+        if job['status'] == 'completed':
+            continue
+
+        # Check if the job is ready for processing
+        time_elapsed = current_time - job['start_time']
+        if time_elapsed >= job['delay']:
+            job['status'] = 'completed' 
+            return jsonify({'message': f'Processed job {job_id}', 'role': job["role"]}), 200
+    return jsonify({'message': 'No jobs ready for processing'}), 204
 
 @app.route('/cancel/<job_id>', methods=['POST'])
 def cancel_job(job_id):
@@ -119,7 +162,26 @@ def list_jobs():
     """
     for job_id in jobs.keys():
         update_job_status(job_id)
-    return jsonify(jobs), 200
+    
+    categorized_jobs = {
+        "pending": {"free": {}, "premium": {}},
+        "completed": {"free": {}, "premium": {}},
+        "failed": {"free": {}, "premium": {}},
+        "permanently_failed": {"free": {}, "premium": {}}
+    }
+
+    for job_id, job in jobs.items():
+        role = job.get("role", "unknown") 
+        if job["status"] == "pending":
+            categorized_jobs["pending"].setdefault(role, {})[job_id] = job
+        elif job["status"] == "completed":
+            categorized_jobs["completed"].setdefault(role, {})[job_id] = job
+        elif job["status"] == "failed":
+            categorized_jobs["failed"].setdefault(role, {})[job_id] = job
+        elif job["status"] == "permanently failed":
+            categorized_jobs["permanently_failed"].setdefault(role, {})[job_id] = job
+
+    return jsonify(categorized_jobs), 200
 
 @app.route('/config', methods=['GET', 'POST'])
 def config():
