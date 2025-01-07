@@ -183,6 +183,15 @@ def list_jobs():
 
     return jsonify(categorized_jobs), 200
 
+@app.route('/cleanup', methods=['POST'])
+def cleanup_jobs():
+    """
+    Remove completed jobs from the jobs dictionary. Clean up old jobs to save memory.
+    """
+    global jobs
+    jobs = {job_id: job for job_id, job in jobs.items() if job['status'] != 'completed'}
+    return jsonify({'message': 'Processed jobs removed'}), 200
+
 @app.route('/config', methods=['GET', 'POST'])
 def config():
     """
