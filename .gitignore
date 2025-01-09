@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 scratch.txt
 .vscode/
+pretty-print.json
