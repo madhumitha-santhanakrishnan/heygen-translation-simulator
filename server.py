@@ -6,6 +6,8 @@ import os
 
 app = Flask (__name__)
 
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+
 ADMIN_TOKEN = "the_secure_token"  
 MAX_RETRIES = 3
 RATE_LIMIT = 5  # Maximum number of requests for FREE users per hour
@@ -167,7 +169,8 @@ def list_jobs():
         "pending": {"free": {}, "premium": {}},
         "completed": {"free": {}, "premium": {}},
         "failed": {"free": {}, "premium": {}},
-        "permanently_failed": {"free": {}, "premium": {}}
+        "permanently_failed": {"free": {}, "premium": {}},
+        "cancelled": {"free": {}, "premium": {}}
     }
 
     for job_id, job in jobs.items():
@@ -180,8 +183,11 @@ def list_jobs():
             categorized_jobs["failed"].setdefault(role, {})[job_id] = job
         elif job["status"] == "permanently failed":
             categorized_jobs["permanently_failed"].setdefault(role, {})[job_id] = job
+        elif job["status"] == "cancelled":
+            categorized_jobs["cancelled"].setdefault(role, {})[job_id] = job
 
     return jsonify(categorized_jobs), 200
+
 
 @app.route('/cleanup', methods=['POST'])
 def cleanup_jobs():
