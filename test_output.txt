@@ -1,0 +1,118 @@
+Starting the server...
+Submitting a free translation job...
+Free job submitted successfully. Job ID: 8cb9e32e-71e1-4ef1-a9cc-9cff8bcaf2c0
+
+Attempting to cancel the free job...
+Cancel response: Job 8cb9e32e-71e1-4ef1-a9cc-9cff8bcaf2c0 cancelled successfully
+
+Submitting a premium translation job...
+Premium job submitted successfully. Job ID: a966f623-2df4-4613-8e05-8d59242122f1
+
+Checking status for the free job...
+Final status of free job 8cb9e32e-71e1-4ef1-a9cc-9cff8bcaf2c0: cancelled
+
+Checking status for the premium job...
+Final status of premium job a966f623-2df4-4613-8e05-8d59242122f1: completed
+
+Testing rate limiting for free user...
+Submitting job 1 for free user free_user_123...
+Job 1 submitted successfully. Job ID: d6ac2890-884d-4d01-b127-7352b460bf9f
+Submitting job 2 for free user free_user_123...
+Job 2 submitted successfully. Job ID: e63f3c42-785a-44dd-a037-4a752ed1e344
+Submitting job 3 for free user free_user_123...
+Job 3 submitted successfully. Job ID: 6e48dff0-1784-46aa-a003-109ded15b873
+Submitting job 4 for free user free_user_123...
+Job 4 submitted successfully. Job ID: de3285e3-2db4-4250-b427-3580d687dc6c
+Submitting job 5 for free user free_user_123...
+Job 5 submission failed due to rate limiting.
+Submitting job 6 for free user free_user_123...
+Job 6 submission failed due to rate limiting.
+Submitting job 7 for free user free_user_123...
+Job 7 submission failed due to rate limiting.
+
+Fetching all jobs categorized by status...
+Jobs:
+ {
+    "cancelled": {
+        "free": {
+            "8cb9e32e-71e1-4ef1-a9cc-9cff8bcaf2c0": {
+                "delay": 15,
+                "priority": 0,
+                "progress": 0,
+                "reason": "Testing cancellation of a free job.",
+                "retries": 0,
+                "role": "free",
+                "start_time": 1736496808.203903,
+                "status": "cancelled"
+            }
+        },
+        "premium": {}
+    },
+    "completed": {
+        "free": {},
+        "premium": {
+            "a966f623-2df4-4613-8e05-8d59242122f1": {
+                "delay": 7,
+                "priority": 1,
+                "progress": 100,
+                "retries": 0,
+                "role": "premium",
+                "start_time": 1736496808.212597,
+                "status": "completed"
+            }
+        }
+    },
+    "failed": {
+        "free": {},
+        "premium": {}
+    },
+    "pending": {
+        "free": {
+            "6e48dff0-1784-46aa-a003-109ded15b873": {
+                "delay": 15,
+                "priority": 0,
+                "progress": 0,
+                "retries": 0,
+                "role": "free",
+                "start_time": 1736496823.270983,
+                "status": "pending"
+            },
+            "d6ac2890-884d-4d01-b127-7352b460bf9f": {
+                "delay": 15,
+                "priority": 0,
+                "progress": 0,
+                "retries": 0,
+                "role": "free",
+                "start_time": 1736496823.258101,
+                "status": "pending"
+            },
+            "de3285e3-2db4-4250-b427-3580d687dc6c": {
+                "delay": 15,
+                "priority": 0,
+                "progress": 0,
+                "retries": 0,
+                "role": "free",
+                "start_time": 1736496823.27748,
+                "status": "pending"
+            },
+            "e63f3c42-785a-44dd-a037-4a752ed1e344": {
+                "delay": 15,
+                "priority": 0,
+                "progress": 0,
+                "retries": 0,
+                "role": "free",
+                "start_time": 1736496823.2633998,
+                "status": "pending"
+            }
+        },
+        "premium": {}
+    },
+    "permanently_failed": {
+        "free": {},
+        "premium": {}
+    }
+}
+
+Test completed successfully!
+
+Stopping the server...
