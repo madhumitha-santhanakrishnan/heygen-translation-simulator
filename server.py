@@ -203,20 +203,27 @@ def config():
     """
     Get or set the configuration values dynamically, when server is running and restart is not ideal.
     """
-    global TRANSLATION_DELAY, ERROR_RATE
+    global TRANSLATION_DELAY, ERROR_RATE, RATE_LIMIT
 
     if request.method == 'GET':
-        return jsonify({'TRANSLATION_DELAY': TRANSLATION_DELAY, 'ERROR_RATE': ERROR_RATE}), 200
+        return jsonify({
+            'TRANSLATION_DELAY': TRANSLATION_DELAY,
+            'ERROR_RATE': ERROR_RATE,
+            'RATE_LIMIT': RATE_LIMIT 
+        }), 200
     
     if request.method == 'POST':
         data = request.get_json()
         TRANSLATION_DELAY = data.get('TRANSLATION_DELAY', TRANSLATION_DELAY)
         ERROR_RATE = data.get('ERROR_RATE', ERROR_RATE)
+        RATE_LIMIT = data.get('RATE_LIMIT', RATE_LIMIT)  # Allow dynamic rate limit configuration
         return jsonify({
             'TRANSLATION_DELAY': TRANSLATION_DELAY,
             'ERROR_RATE': ERROR_RATE,
+            'RATE_LIMIT': RATE_LIMIT,
             'message': 'Configuration updated successfully'
         }), 200
+
     
 if __name__ == '__main__':
     app.run(port=4777)
