@@ -42,6 +42,15 @@ class TranslationClient:
         5. List all jobs:
             >>> jobs = client.list_jobs()
             >>> print("All jobs categorized by status:", jobs)
+        
+    Notes:
+        - Ensure the server is running and accessible at `base_url` before using the library.
+        - Adjust `polling_interval` and `max_retries` based on server performance and requirements.
+
+    Common Errors:
+        - `requests.exceptions.RequestException`: Network or HTTP issues (Eg. server unreachable).
+        - 429 Rate Limit Exceeded: Warns and skips job submission for free users exceeding limits.
+        - Missing Admin Token: Prevents job cancellations if `admin_token` is not provided.
     """
 
     def __init__(self, base_url, polling_interval=5, max_retries=3, admin_token=None):
