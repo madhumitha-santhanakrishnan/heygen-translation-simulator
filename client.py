@@ -6,6 +6,7 @@ class TranslationClient:
     """
     A client library to interact with the translation server.
     """
+
     def __init__(self, base_url, polling_interval=5, max_retries=3, admin_token=None):
         self.base_url = base_url
         self.polling_interval = polling_interval
@@ -13,19 +14,25 @@ class TranslationClient:
         self.admin_token = admin_token
         logging.basicConfig(level=logging.INFO) # DEBUG will be ignored by default
     
-    def submit_translation_job(self, role="free"):
+    def submit_translation_job(self, role="free",user_id="anonymous"):
         """
-        Submit a new translation job with a specific role. 
+        Submit a new translation job with a specific role and user ID. 
         """
+        headers = {"X-User-Id": user_id}
         try:
-            response = requests.post(f"{self.base_url}/translate", json={"role": role})
+            response = requests.post(f"{self.base_url}/translate", json={"role": role}, headers=headers)
             response.raise_for_status()
             data = response.json()
             logging.info(f"Job submitted successfully. Job ID: {data['job_id']}")
             return data["job_id"]
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to submit job: {e}")
-            return None
+        except requests.exceptions.HTTPError as http_err:
+            if response.status_code == 429:
+                logging.warning(f"Rate limit exceeded for user {user_id}. Skipping this request.")
+                return None
+            logging.error(f"HTTP error occurred: {http_err}")
+        except requests.exceptions.RequestException as req_err:
+            logging.error(f"Request failed: {req_err}")
+        return None
     
     def check_status(self, job_id):
         """
