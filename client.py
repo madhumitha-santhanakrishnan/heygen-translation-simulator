@@ -5,6 +5,43 @@ import logging
 class TranslationClient:
     """
     A client library to interact with the translation server.
+
+    This library provides methods to submit translation jobs, check their statuses,
+    cancel jobs, and list all jobs. It is designed to interact seamlessly with the
+    provided translation server.
+
+    Args:
+        base_url (str): The base URL of the translation server.
+        polling_interval (int): The interval (in seconds) to wait between status checks.
+        max_retries (int): The maximum number of retries to check the status of a job.
+        admin_token (str): An admin token is required to cancel jobs. If not provided, only job submission and status checks are allowed.
+
+    1. Initialize the client:
+            >>> client = TranslationClient(
+            ...     base_url="http://localhost:4777",
+            ...     polling_interval=5,
+            ...     max_retries=3,
+            ...     admin_token="<ADMIN_TOKEN>"
+            ... )
+
+        2. Submit a translation job (Free or Premium) with a user ID:
+            >>> free_job_id = client.submit_translation_job(role="free", user_id="f_user123")
+            >>> print(f"Free job submitted. Job ID: {free_job_id}")
+
+            >>> premium_job_id = client.submit_translation_job(role="premium", user_id="p_user456")
+            >>> print(f"Premium job submitted. Job ID: {premium_job_id}")
+
+        3. Check job status:
+            >>> status = client.check_status(free_job_id)
+            >>> print(f"Free job status: {status}")
+
+        4. Cancel a job (Admin-only):
+            >>> cancel_message = client.cancel_job(free_job_id, reason="No longer needed")
+            >>> print(f"Cancel response: {cancel_message}")
+
+        5. List all jobs:
+            >>> jobs = client.list_jobs()
+            >>> print("All jobs categorized by status:", jobs)
     """
 
     def __init__(self, base_url, polling_interval=5, max_retries=3, admin_token=None):
