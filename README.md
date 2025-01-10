@@ -1,6 +1,6 @@
-# Heygen Translation Simulator
+# HeyGen Translation Simulator
 
-Welcome to the Heygen Translation Simulator! 
+Welcome to the HeyGen Translation Simulator! 
 
 ## Overview
 This project is an attempt to mimic the simulation of HeyGen's video translation feature. It includes:
@@ -272,3 +272,13 @@ To view the test output, simply open the `test_output.txt` file in this reposito
 ### Troubleshooting
 
 - **Server Port Conflict**: If the server port `4777` is already in use, update the `app.run(port=...)` line in `server.py` to use a different port.
+
+### Planned Work
+
+While the current implementation is fully functional, I have planned the following features for future iterations.
+
+1. Log server performance metrics like request processing times, errors, and completed jobs. 
+2. Develop a web interface to visualize job statuses, queue priorities, and other metrics in real-time. 
+3. Add unit tests and more complex integration tests to handle edge cases like submitting cancellations simultaneously, high error-rate scenarios etc. 
+4. Switch to FastAPI for asynchronous processing of jobs. 
+5. An additional endpoint/feature to handle user-specific job history.
