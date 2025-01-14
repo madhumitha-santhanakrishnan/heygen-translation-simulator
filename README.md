@@ -53,7 +53,7 @@ This project is an attempt to mimic the simulation of HeyGen's video translation
 
 1. Clone the repository:
    ```bash
-   https://github.com/madhumitha-santhanakrishnan/heygen-translation-simulator.git
+   git clone https://github.com/madhumitha-santhanakrishnan/heygen-translation-simulator.git
    cd heygen-translation-simulator
    ```
 
