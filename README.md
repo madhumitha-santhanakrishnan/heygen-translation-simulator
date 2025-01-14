@@ -282,3 +282,4 @@ While the current implementation is fully functional, I have planned the followi
 3. Add unit tests and more complex integration tests to handle edge cases like submitting cancellations simultaneously, high error-rate scenarios etc. 
 4. Switch to FastAPI for asynchronous processing of jobs. 
 5. An additional endpoint/feature to handle user-specific job history.
+6. Add support for **actual video file uploads** to simulate the complete video translation process. Integrate libraries like 'ffmpeg' for handling video operations. 
